@@ -1,0 +1,4 @@
+Write a simple python script that, by invoking tshark, prints the IPs that are likely natted using the TCP timestamp option.
+Requirements:
+self-contained python script that uses tshark for the packet analysis
+the tool should receive a pcap file as parameter and print the IP addresses that are likely natted.
