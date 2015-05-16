@@ -13,7 +13,7 @@ cmd = "tshark -r capture.pcap -2 -R tcp -T fields -e ip.src -e tcp.options.times
 ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 output = ps.communicate()[0]
 
-#gather timestamps and ips from output
+#fill data structure
 count = 0
 data = list()
 for s in output.split():
@@ -31,18 +31,25 @@ for s in output.split():
 		count+=1
 
 found = list()
-#perform subtraction among timestamps
+slopes = list()
+ips = list()
+#find slopes of lines between consecutive timestamps
 for i in range(len(data) - 1):
 	if data[i]["ip"] not in found:
 		p1 = data[i]
 		p2 = data[i+1]
-	if p1["ip"] != p2["ip"]:
-		continue	
-	A = (p2["ts"] - p1["ts"]) / (p2["t"] - p1["t"])
-	if A > 300:
-		print "found", p1["ip"], A
-		found.append(p1["ip"])
-		continue
+		if p1["ip"] != p2["ip"] or p1["ts"] == p2["ts"]:
+			continue	
+		if p1["ip"] not in ips:
+			print "adding", p1["ip"]
+			ips.append(p1["ip"])
+			slopes[:] = []
+		A = (p2["ts"] - p1["ts"]) / (p2["t"] - p1["t"])
+		for s in slopes:
+			if A - s > 100 or A-s < -100:
+				found.append(p1["ip"])
+				print p1["ip"], A
+		slopes.append(A)
 
 
 
