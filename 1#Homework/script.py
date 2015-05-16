@@ -1,4 +1,6 @@
 #!/usr/bin/python
+from classes.line import Line
+from classes.point import Point
 import subprocess
 
 #function to convert hh:mm:ss.ns to ns
@@ -35,6 +37,23 @@ slopes = list()
 ips = list()
 #find slopes of lines between consecutive timestamps
 for i in range(len(data) - 1):
+	if data[i]["ip"] in ips:
+		print ips
+		continue
+	if data[i]["ip"] != data[i+1]["ip"]:
+		continue
+	p1 = Point(data[i]["t"], data[i]["ts"])
+	p2 = Point(data[i+1]["t"], data[i+1]["ts"])
+	l = Line(p1, p2)
+	#print "new line:", l, p1, p2
+	for j in range (i+2, len(data)):
+		p3 = Point(data[j]["t"], data[j]["ts"])
+		#print "verifying", p3
+		if not l.contains(p3):
+			print "found natted ip:", data[j]["ip"]
+			ips.append(data[j]["ip"])
+	
+'''
 	if data[i]["ip"] not in found:
 		p1 = data[i]
 		p2 = data[i+1]
@@ -50,6 +69,6 @@ for i in range(len(data) - 1):
 				found.append(p1["ip"])
 				print p1["ip"], A
 		slopes.append(A)
-
+'''
 
 
