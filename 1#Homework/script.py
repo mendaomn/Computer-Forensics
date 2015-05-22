@@ -36,8 +36,9 @@ for s in output.split():
 	if count == 2:
 		t=s
 		count = 0
-		d={"ip":ip, "ts":int(ts), "t":time_conversion(t)}
-		data.append(d)
+		if ts.isdigit():
+			d={"ip":ip, "ts":int(ts), "t":time_conversion(t)}
+			data.append(d)
 	else:
 		count+=1
 
