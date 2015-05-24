@@ -2,26 +2,21 @@
 import sys
 import os
 import subprocess
+import math
 
-#functions 
-
-#check command line arg
+# check command line arg
 if len(sys.argv) != 2:
 	print "Usage: python script.py <filesystem>"
 	exit()
 
-#retrive filesystem from command line
+# retrive filesystem from command line
 fs = sys.argv[1]
-fs_info = os.statvfs(fs)
-bsize = fs_info.f_bsize
 
-'''
-fls -> inodes and files
-for each inode:
-	istat -> direct blocks
-	for last block:
-		dd if=megafs bs=1024 skip=12357 count=1 > lastblock
-'''
+# store block size
+cmd = "fsstat "+fs+" | grep \"Block Size\""
+ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
+bsize = ps.communicate()[0].split()[-1]
+
 # obtain list of files
 cmd = "fls -r "+fs
 ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
@@ -55,7 +50,28 @@ for entry in entries[:-1]:
 		f = {"inode":inode, "name":filename, "size":size, "block": last_block}
 		files.append(f)
 
-# 
-cmd = "dd if=fs/megafs bs=1024 skip=12357 count=1 2> /dev/null"
-ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-output = ps.communicate()[0]
+# loop through files and read last block
+for f in files:
+	cmd = "dd if=fs/megafs bs="+bsize+" skip="+f["block"]+" count=1 > tmp 2> /dev/null"
+	ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
+	output = ps.communicate()[0]
+	nblocks = int(math.ceil(int(f['size'])/float(bsize)))
+	slack = nblocks*int(bsize) - int(f['size'])
+	actualbytes = int(bsize) - slack
+	f = open("tmp", "rb")
+	count = 0
+	hidden=""
+	try:
+	    byte = f.read(1)
+	    while byte != "":
+	        count += 1
+	        if count > actualbytes and ord(byte) != 0x0:
+	        	hidden+=byte
+	        byte = f.read(1)
+	finally:
+	    f.close()
+	os.remove("tmp")
+	if hidden:
+		print hidden
+
+	
