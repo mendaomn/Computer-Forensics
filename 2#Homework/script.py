@@ -18,7 +18,7 @@ ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
 bsize = ps.communicate()[0].split()[-1]
 
 # obtain list of files
-cmd = "fls -r "+fs
+cmd = "fls -r -F "+fs
 ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
 fls_o = ps.communicate()[0]
 entries = fls_o.split('\n')
@@ -50,6 +50,7 @@ for entry in entries[:-1]:
 		f = {"inode":inode, "name":filename, "size":size, "block": last_block}
 		files.append(f)
 
+
 # loop through files and read last block
 for f in files:
 	cmd = "dd if=fs/megafs bs="+bsize+" skip="+f["block"]+" count=1 > tmp 2> /dev/null"
@@ -58,19 +59,20 @@ for f in files:
 	nblocks = int(math.ceil(int(f['size'])/float(bsize)))
 	slack = nblocks*int(bsize) - int(f['size'])
 	actualbytes = int(bsize) - slack
-	f = open("tmp", "rb")
+	tmp = open("tmp", "rb")
 	count = 0
 	hidden=""
 	try:
-	    byte = f.read(1)
+	    byte = tmp.read(1)
 	    while byte != "":
 	        count += 1
 	        if count > actualbytes and ord(byte) != 0x0:
 	        	hidden+=byte
-	        byte = f.read(1)
+	        byte = tmp.read(1)
 	finally:
-	    f.close()
+	    tmp.close()
 	os.remove("tmp")
+	print "file", f["name"]
 	if hidden:
 		print hidden
 
