@@ -3,6 +3,9 @@ import sys
 import os
 import subprocess
 import math
+import time
+from progress.bar import ChargingBar
+
 
 # check command line arg
 if len(sys.argv) != 2:
@@ -50,7 +53,8 @@ for entry in entries[:-1]:
 		f = {"inode":inode, "name":filename, "size":size, "block": last_block}
 		files.append(f)
 
-
+bar_max = len(files)
+bar = ChargingBar('Progress:', max=bar_max)
 # loop through files and read last block
 for f in files:
 	cmd = "dd if="+fs+" bs="+bsize+" skip="+f["block"]+" count=1 > tmp 2> /dev/null"
@@ -62,19 +66,20 @@ for f in files:
 	actualbytes = int(bsize) - slack
 	# read slack space
 	tmp = open("tmp", "rb")
-	count = 0
+	bcount = 0
 	hidden=""
 	try:
 	    byte = tmp.read(1)
 	    while byte != "":
-	        count += 1
-	        if count > actualbytes and ord(byte) != 0x0:
+	        bcount += 1
+	        if bcount > actualbytes and ord(byte) != 0x0:
 	        	hidden+=byte
 	        byte = tmp.read(1)
 	finally:
 	    tmp.close()
 	os.remove("tmp")
-	if hidden:
-		print hidden
-
-	
+	#if hidden:
+		#print hidden
+	bar.next()
+	time.sleep(0.2)
+bar.finish()

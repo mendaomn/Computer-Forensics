@@ -20,7 +20,7 @@ if len(sys.argv) != 2:
 filein = sys.argv[1]
 
 #call command and retrieve output
-cmd = "tshark -r "+filein+" -2 -R tcp -T fields -e ip.src -e tcp.options.timestamp.tsval -e frame.time | sort -nk2 | uniq -u | awk '{print $1, $2, $NF}' "
+cmd = "tshark -r "+filein+" -2 -R tcp -T fields -e ip.src -e tcp.options.timestamp.tsval -e frame.time | sort -nk1 | uniq -u | awk '{print $1, $2, $NF}' "
 ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 output = ps.communicate()[0]
 
