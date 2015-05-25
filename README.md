@@ -23,7 +23,9 @@ The script should take as input a directory and recursively analyze its content.
 ## Homework 4
 Collect a memory snapshot of a linux machine. Install volatility 2.4 (use the official release, not the development version), build the profile for your linux dump, and test that it works by listing the processes in the memory image. Then, using volatily as a library (example), write a tool that accepts as parameters two snapshot taken from the same machine at different times (e.g., 15 minutes one after the other) and for each processes (uniquely identified by its PID), list the number of pages that are different between the two snapshots. (you can find an example to list the process pages here
 For instance, the output should be like:
-   PID    Pages that matches      Pages that are different
-  1234           55                        32
-  1235          122                         1
-	...
+
+| PID  | Pages that matches | Pages that are different |
+|------|--------------------|--------------------------|
+| 1234 | 55                 | 32                       |
+| 1235 | 122                | 1                        |
+| ...  | ...                | ...                      |
