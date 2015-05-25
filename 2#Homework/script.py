@@ -1,11 +1,17 @@
 #!/usr/bin/python
 import sys
 import os
+import shutil
 import subprocess
 import math
 import time
 from progress.bar import ChargingBar
 
+# defines
+directory = "forensics_homework2_menduni_subdir"
+if os.path.exists(directory):
+	shutil.rmtree(directory)
+tmpfile = "forensics_homework2_menduni_tmpfile"
 
 # check command line arg
 if len(sys.argv) != 2:
@@ -57,7 +63,7 @@ bar_max = len(files)
 bar = ChargingBar('Progress:', max=bar_max)
 # loop through files and read last block
 for f in files:
-	cmd = "dd if="+fs+" bs="+bsize+" skip="+f["block"]+" count=1 > tmp 2> /dev/null"
+	cmd = "dd if="+fs+" bs="+bsize+" skip="+f["block"]+" count=1 > "+tmpfile+" 2> /dev/null"
 	ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
 	output = ps.communicate()[0]
 	# compute how many bytes to expect in last block
@@ -65,7 +71,7 @@ for f in files:
 	slack = nblocks*int(bsize) - int(f['size'])
 	actualbytes = int(bsize) - slack
 	# read slack space
-	tmp = open("tmp", "rb")
+	tmp = open(tmpfile, "rb")
 	bcount = 0
 	hidden=""
 	try:
@@ -77,9 +83,17 @@ for f in files:
 	        byte = tmp.read(1)
 	finally:
 	    tmp.close()
-	os.remove("tmp")
-	#if hidden:
-		#print hidden
+	os.remove(tmpfile)
+	# use subdir to store result files
+	# create file named after inode and write hidden bytes 
+	if hidden != "":
+		if not os.path.exists(directory):
+			os.makedirs(directory)
+		f_out = open(directory+"/"+f["inode"], 'w')
+		try:
+			f_out.write(hidden)
+		finally:
+			f_out.close()
 	bar.next()
 	time.sleep(0.2)
 bar.finish()
