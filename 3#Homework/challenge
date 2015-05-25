@@ -1,0 +1,2 @@
+Write a python script to detect camouflaged files. The script should use the python magic bindings compare the results with the mime types (extracted from /etc/mime.types by default or by a file specified as parameter)
+The script should take as input a directory and recursively analyze its content.
