@@ -53,12 +53,14 @@ for entry in entries[:-1]:
 
 # loop through files and read last block
 for f in files:
-	cmd = "dd if=fs/megafs bs="+bsize+" skip="+f["block"]+" count=1 > tmp 2> /dev/null"
+	cmd = "dd if="+fs+" bs="+bsize+" skip="+f["block"]+" count=1 > tmp 2> /dev/null"
 	ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
 	output = ps.communicate()[0]
+	# compute how many bytes to expect in last block
 	nblocks = int(math.ceil(int(f['size'])/float(bsize)))
 	slack = nblocks*int(bsize) - int(f['size'])
 	actualbytes = int(bsize) - slack
+	# read slack space
 	tmp = open("tmp", "rb")
 	count = 0
 	hidden=""
@@ -72,7 +74,6 @@ for f in files:
 	finally:
 	    tmp.close()
 	os.remove("tmp")
-	print "file", f["name"]
 	if hidden:
 		print hidden
 
