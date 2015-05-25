@@ -20,7 +20,7 @@ if len(sys.argv) != 2:
 filein = sys.argv[1]
 
 #call command and retrieve output
-cmd = "tshark -r "+filein+" -2 -R tcp -T fields -e ip.src -e tcp.options.timestamp.tsval -e frame.time | sort -nk1 | uniq -u | awk '{print $1, $2, $NF}' "
+cmd = "tshark -r "+filein+" -2 -R tcp -T fields -e ip.src -e tcp.options.timestamp.tsval -e frame.time_epoch | sort -u "
 ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 output = ps.communicate()[0]
 
@@ -37,10 +37,11 @@ for s in output.split():
 		t=s
 		count = 0
 		if ts.isdigit():
-			d={"ip":ip, "ts":int(ts), "t":time_conversion(t)}
+			d={"ip":ip, "ts":int(ts), "t":float(t)}
 			data.append(d)
 	else:
 		count+=1
+
 
 #consider each packet as a "point" P = (time_of_capture, timestamp)
 #connect with a line packets having same source IP address 
@@ -55,10 +56,10 @@ for i in range(len(data) - 1):
 		p2 = Point(data[i+1]["t"], data[i+1]["ts"])
 		l = Line(p1, p2)
 		for j in range (i+2, len(data)):
-			p3 = Point(data[j]["t"], data[j]["ts"])
-			l.setThreshold(data[j]["ts"] * 0.3)
-			if not l.contains(p3):
-				print data[j]["ip"]
-				break
-
+			if data[j]["ip"] == curr_ip:
+				p3 = Point(data[j]["t"], data[j]["ts"])
+				l.setThreshold(data[j]["ts"] * 0.3)
+				if not l.contains(p3):
+					print data[j]["ip"]
+					break
 
