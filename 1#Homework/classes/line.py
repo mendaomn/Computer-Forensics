@@ -8,7 +8,6 @@ class Line(object):
 		y_ = (self.m * p.x) + self.q
 		if abs(y_ - p.y) <= float(self.t):
 			return True
-		#print (abs(y_ - p.y) - float(self.t)) / 1000000, float(self.t) / 1000000
 		return False
 		
 	def addPoint(self, p):
