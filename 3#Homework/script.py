@@ -1,11 +1,10 @@
 #!/usr/bin/python
 import sys
 import magic
-import os.path
+import os
 
-#defines
+# defines
 mimelist = "/etc/mime.types"
-filename = "badfile.fag"
 
 # check command line arg
 if len(sys.argv) == 1:
@@ -17,30 +16,77 @@ else:
 	print "Usage: python script.py <mime.types>"
 	exit()
 
-# get mime type through magic bindings
-guess = magic.from_file(filename, mime=True)
-actual_ext = os.path.splitext(filename)[1][1:]
-print guess, actual_ext
-# check such a type against /etc/mime.types or input file
-#### extract extension corresponding to such a mime type from mime.types
-#### compare expected extension with actual one
+# ask for directory to be traversed
+dirname = raw_input("Insert directory to analyse: ")
+print
 
-# !!!! some type has more than one exT!!
+flist = []
+for root, dirs, files in os.walk(dirname):
+	for fname in files:
+		# guess file type
+		mimetype = magic.from_file(root+"/"+fname, mime=True)
+		# extract file extension
+		ext = os.path.splitext(root+"/"+fname)[1][1:]
+		# store tuple (filename, mimetype, extension)
+		flist.append({ "name":root+"/"+fname, "type":mimetype, "ext":ext, "found": -1})
 
-
+filecount = 0
+nfile = len(flist)
 f = open(mimelist, "r")
 for line in f:
+	if filecount == nfile:
+		break
 	if line[0] == "#" or line == "":
 		continue
 	words = line.split()
-	if len(words) == 2:
+	wc = len(words)
+	if wc == 0:
+		continue
+	if wc == 1:
+		mtype = words[0]
+		expected_ext = "no_ext"
+	if wc == 2:
 		mtype = words[0]
 		expected_ext = words[1]
-	else:
-		mtype = line
-		expected_ext = ""
-	print mtype, expected_ext
-	if mtype == guess and expected_ext != actual_ext:
-		print "File "+filename+" camouflaged"
-f.close()
+	if wc > 2:
+		mtype = words[0]
+		expected_ext = words[1:len(words)]
+	for curr_f in flist:
+		guess = curr_f["type"]
+		actual_ext = curr_f["ext"]
+		filename = curr_f["name"]
+		if mtype == guess:
+			if wc > 2:
+				for i in expected_ext: 
+					if i == actual_ext:
+						curr_f["found"] = 2
+				if curr_f["found"] != 2:
+					curr_f["found"] = 1
+			if wc == 1:
+				if actual_ext != "":
+					curr_f["found"] = 1
+				else:
+					curr_f["found"] = 2
+			if wc == 2:
+				if expected_ext != actual_ext:
+					curr_f["found"] = 1
+				else:
+					curr_f["found"] = 2
+			if curr_f["found"] == 1:
+				print "camouflaged file: "+filename
+				print "\tmime: "+guess
+				print "\text: "+actual_ext
+				if type(expected_ext) == list:
+					print "\texpecting: "+" ".join(expected_ext)
+				else:
+					print "\texpecting: "+expected_ext
+				filecount += 1
+			if curr_f["found"] == 2:
+				print "trusted file: "+filename
+				filecount += 1
 
+f.close()
+for curr_f in flist:
+	if curr_f["found"] == -1:
+		print "File not identified: "+curr_f["name"]
+		print "\t"+curr_f["type"]+" is not present in mime types list" 
