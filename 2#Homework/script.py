@@ -44,17 +44,17 @@ for entry in entries[:-1]:
 		grep_o = ps.communicate()[0]
 		size = grep_o.split()[1]
 		# store last block
-		# look for indirect blocks first
-		cmd = "istat "+fs+" "+inode+" | grep -A 10000 \"Indirect Blocks\""
+		# look for direct blocks
+		cmd = "istat "+fs+" "+inode+" | awk '/Direct/,/^$/'"
 		ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
 		grep_o = ps.communicate()[0]
-		# look for direct blocks if no indirect blocks were used
-		if not grep_o:
-			cmd = "istat "+fs+" "+inode+" | grep -A 10000 \"Direct Blocks\""
-			ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-			grep_o = ps.communicate()[0]
 		blocks = grep_o.split('\n')[1:-1]
-		last_block = blocks[-1].split()[-1]
+		index = 1
+		for i in range(1, len(blocks)):
+			if blocks[-i] != "":
+				index = i
+				break
+		last_block = blocks[-index].split()[-1]
 		# store file info
 		f = {"inode":inode, "name":filename, "size":size, "block": last_block}
 		files.append(f)
