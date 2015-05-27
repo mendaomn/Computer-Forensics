@@ -95,5 +95,4 @@ for f in files:
 		finally:
 			f_out.close()
 	bar.next()
-	time.sleep(0.2)
 bar.finish()
