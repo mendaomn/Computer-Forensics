@@ -21,12 +21,12 @@ config.parse_options()
 config.PROFILE="LinuxUbuntu1404x64"
 config.LOCATION = "/home/marv/Scrivania/dump1138"
 import volatility.plugins.linux as linux
-p = linux.pslist(config)
-for process in p.calculate():
-	print process
+p = linux.linux_pslist(config)
+print p.calculate():
 
 
 
+'''
 Listing processes in memory image:
 python vol.py linux_pslist -f ../dump1138 --profile=LinuxUbuntu1404x64
 
@@ -38,3 +38,4 @@ python vol.py -f ../dump1138 --profile=LinuxUbuntu1404x64 -p 1798 linux_proc_map
 
 Reading from memory
 python vol.py -f ../dump1138 --profile=LinuxUbuntu1404x64 -p 1798 linux_dump_map -s 0x0000000000400000 --dump-dir outputdir
+'''
