@@ -1,0 +1,82 @@
+
+OUTPUT EXAMPLE
+
+   PID    Pages that matches      Pages that are different
+  1234           55                        32
+  1235          122                         1
+
+USEFUL COMMANDS LIST
+
+Listing processes in memory image:
+python vol.py linux_pslist -f ../dump1138 --profile=LinuxUbuntu1404x64
+
+Listing pages addresses of process 1798:
+python vol.py -f ../dump1138 --profile=LinuxUbuntu1404x64 -p 1798 linux_memmap | less
+
+Listing details of process memory, including heaps, stacks, and shared libraries
+python vol.py -f ../dump1138 --profile=LinuxUbuntu1404x64 -p 1798 linux_proc_maps | less
+
+Reading from memory
+python vol.py -f ../dump1138 --profile=LinuxUbuntu1404x64 -p 1798 linux_dump_map -s 0x0000000000400000 --dump-dir outputdir
+
+
+python vol.py -f /home/marv/Scrivania/dump1138 --profile=LinuxUbuntu1404x64 linux_proc_maps > figofigo 
+cat figofigo | awk '{print $1}' | uniq -c | sort -nk1
+output
+     19 1036
+     39 1132
+     39 548
+     39 974
+     39 978
+     39 984
+     39 985
+     39 988
+     40 729
+     41 1319
+     41 1355
+     41 1357
+     45 1029
+     45 774
+     47 336
+     58 1116
+     61 1353
+     61 817
+     72 798
+     73 1
+     73 793
+     77 1199
+     80 1065
+     85 1325
+     86 1417
+     87 1308
+     88 736
+     90 731
+     93 784
+     99 1393
+    101 348
+    109 1433
+    145 1403
+    148 1032
+    152 1406
+    154 1153
+    158 809
+    160 1408
+    167 1364
+    170 1162
+    188 1336
+    195 1185
+    222 1454
+    224 761
+    256 803
+    285 1138
+    295 1175
+    328 1410
+    411 1407
+    444 1413
+    450 1411
+    476 1397
+    623 1390
+
+
+
+
